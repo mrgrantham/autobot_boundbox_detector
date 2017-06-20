@@ -44,18 +44,7 @@ def main(argv):
     capture = cv2.VideoCapture() 
 
     parser = argparse.ArgumentParser()
-    # Required arguments: input and output.
-    # parser.add_argument(
-    #     "input_file",
-    #     help="Input txt/csv filename. If .txt, must be list of filenames.\
-    #     If .csv, must be comma-separated file with header\
-    #     'filename, xmin, ymin, xmax, ymax'"
-    # )
-    # parser.add_argument(
-    #     "output_file",
-    #     help="Output h5/csv filename. Format depends on extension."
-    # )
-    # Optional arguments.
+
     parser.add_argument(
         "--model_def",
         default=os.path.join(pycaffe_dir,
@@ -139,8 +128,9 @@ def main(argv):
 
     # open camera
     # set the frame size
-    # capture.set(cv2.CV_CAP_PROP_FRAME_WIDTH,800)
-    # capture.set(cv2.CV_CAP_PROP_FRAME_HEIGHT,600)
+    capture.set(cv2.CAP_PROP_FRAME_WIDTH,600)
+    capture.set(cv2.CAP_PROP_FRAME_HEIGHT,450)
+    
 
     if not capture.open(0):
         print "capture from camera didn't work"
@@ -150,50 +140,18 @@ def main(argv):
         # # Load input.
         t = time.time()
         print("Loading input...")
-        # if args.input_file.lower().endswith('txt'):
-        #     with open(args.input_file) as f:
-        #         inputs = [_.strip() for _ in f.readlines()]
-        # elif args.input_file.lower().endswith('csv'):
-        #     inputs = pd.read_csv(args.input_file, sep=',', dtype={'filename': str})
-        #     inputs.set_index('filename', inplace=True)
-        # else:
-        #     raise Exception("Unknown input file type: not in txt or csv.")
 
         # load frams from camera
         success, image = capture.read()
-
+        print "Image w: {} h: {}" % (images.shape[1], image.shape[0])
         # generate window coordinates
-        windows = sliding_window(image, 20, (100, 100))
+        windows = sliding_window(image, 40, (100, 100))
 
         # Detect.
         detections = detector.detect_windows(image, windows)
         # print detections
         print("Processed {} windows in {:.3f} s.".format(len(detections),
                                                         time.time() - t))
-
-        # Collect into dataframe with labeled fields.
-        # df = pd.DataFrame(detections)
-        # df.set_index('filename', inplace=True)
-        # df[COORD_COLS] = pd.DataFrame(
-        #     data=np.vstack(df['window']), index=df.index, columns=COORD_COLS)
-        # del(df['window'])
-
-        # # Save results.
-        # t = time.time()
-        # if args.output_file.lower().endswith('csv'):
-        #     # csv
-        #     # Enumerate the class probabilities.
-        #     class_cols = ['class{}'.format(x) for x in range(NUM_OUTPUT)]
-        #     df[class_cols] = pd.DataFrame(
-        #         data=np.vstack(df['feat']), index=df.index, columns=class_cols)
-        #     df.to_csv(args.output_file, cols=COORD_COLS + class_cols)
-        # else:
-        #     # h5
-        #     df.to_hdf(args.output_file, 'df', mode='w')
-        # print("Saved to {} in {:.3f} s.".format(args.output_file,
-        #                                         time.time() - t))
-        
-        # for 
         
         cv2.imshow('image',image)
         c = cv2.waitKey(10)
